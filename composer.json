@@ -1,0 +1,6 @@
+{
+    "name": "J05HI/google-drive-direct-remote-upload",
+    "require": {
+        "google/apiclient": "^2.1"
+    }
+}

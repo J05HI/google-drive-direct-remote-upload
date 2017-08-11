@@ -1,0 +1,10 @@
+
+\.idea/
+
+composer\.lock
+
+credentials/auth-credentials\.json
+
+credentials/oauth-credentials\.json
+
+vendor/
