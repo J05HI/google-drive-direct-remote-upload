@@ -1,10 +1,4 @@
-
-\.idea/
-
-composer\.lock
-
-credentials/auth-credentials\.json
-
-credentials/oauth-credentials\.json
-
 vendor/
+\.idea/
+credentials/oauth-credentials\.json
+credentials/auth-credentials\.json

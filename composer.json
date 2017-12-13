@@ -1,6 +1,7 @@
 {
     "name": "J05HI/google-drive-direct-remote-upload",
     "require": {
+        "roave/security-advisories": "dev-master",
         "google/apiclient": "^2.1"
     }
 }
