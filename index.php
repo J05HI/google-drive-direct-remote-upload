@@ -10,7 +10,7 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/GoogleApi.php';
 
 if ('cli' !== PHP_SAPI) {
-    throw new Exception('This application must be run on the command line. You need to modify it a bit to run over the browser :)');
+    echo('This application must be run on the command line. You need to modify it a bit to run over the browser :)');
 }
 
 /**
@@ -24,17 +24,17 @@ if ('cli' !== PHP_SAPI) {
 function readFileChunk($handle, int $chunkSize) {
     $byteCount = 0;
     $giantChunk = '';
-    
+
     while (!feof($handle)) {
-        $chunk = fread($handle, 8192);
+        $chunk = fread($handle, min($chunkSize - $byteCount, 8192));
         $byteCount += strlen($chunk);
         $giantChunk .= $chunk;
-        
+
         if ($byteCount >= $chunkSize) {
             return $giantChunk;
         }
     }
-    
+
     return $giantChunk;
 }
 
@@ -48,12 +48,12 @@ function readFileChunk($handle, int $chunkSize) {
 function remoteFileSize($url) {
     # Get all header information
     $data = get_headers($url, true);
-    
+
     # Look up validity
     if (isset($data['Content-Length'])) {
         return (int)$data['Content-Length'];
     }
-    
+
     return 0;
 }
 
@@ -67,11 +67,11 @@ function remoteFileSize($url) {
 function remoteMimeType($url) {
     $mimeTypes = require 'mimeTypes.php';
     $extension = pathinfo($url, PATHINFO_EXTENSION);
-    
+
     if (isset($mimeTypes[$extension])) {
         return $mimeTypes[$extension];
     }
-    
+
     return 'application/octet-stream';
 }
 
@@ -86,17 +86,17 @@ try {
     $url = 'http://download.thinkbroadband.com/1MB.zip';
     $getFile->name = 'Test File.zip';
     $chunkSizeBytes = 20 * 4 * 256 * 1024;
-    
+
     # Call the API with the media upload, defer so it doesn't immediately return.
     $client->setDefer(true);
     $request = $service->files->create($getFile);
-    
+
     # Get file mime type
     $mimeType = remoteMimeType($url);
-    
+
     # Get file size
     $size = remoteFileSize($url);
-    
+
     # Create a media file upload to represent our upload process.
     $media = new Google_Http_MediaFileUpload(
         $client,
@@ -107,13 +107,13 @@ try {
         $chunkSizeBytes
     );
     $media->setFileSize($size);
-    
+
     # Upload the chunks. Status will be false until the process is complete.
     $status = false;
     $sizeUploaded = 0;
-    
+
     $handle = fopen($url, 'rb');
-    
+
     while (!$status && !feof($handle)) {
         # Read until you get $chunkSizeBytes from the file
         $chunk = readFileChunk($handle, $chunkSizeBytes);
@@ -122,12 +122,12 @@ try {
         $sizeMissing = $size - $sizeUploaded;
         $status = $media->nextChunk($chunk);
     }
-    
+
     fclose($handle);
-    
+
     # The final value of $status will be the data from the API for the object that has been uploaded.
     $uploadedFileId = '';
-    
+
     if ($status !== false) {
         $uploadedFileId = $status['id'];
         print_r($uploadedFileId);
